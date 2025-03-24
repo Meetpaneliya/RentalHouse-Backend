@@ -2,10 +2,11 @@ services:
   - type: web
     name: rental-backend
     env: node
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    buildCommand: npm install
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
     healthCheckPath: /
-    autoDeploy: true 
+    autoDeploy: true
+    rootDir: backend 
