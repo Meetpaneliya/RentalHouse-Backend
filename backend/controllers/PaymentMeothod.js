@@ -4,6 +4,7 @@ import { TryCatch } from "../middlewares/error.js";
 import { config } from "dotenv";
 import paypal from "paypal-rest-sdk";
 import ErrorHandler from "../utils/errorHandler.js";
+import crypto from "crypto";
 config(); // Load environment variables
 
 // Stripe instance
@@ -32,7 +33,7 @@ const createPayment = TryCatch(async (req, res, next) => {
   }
 
   switch (gateway) {
-    case "stripe":
+    case "stripe": {
       // Call your createStripePayment logic
       const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -60,11 +61,12 @@ const createPayment = TryCatch(async (req, res, next) => {
       // Save your payment record if needed...
       return res.status(200).json({
         success: true,
-        sessionId: stripeSession.id, // or use session.id if you handle redirection client-side
-        redirectUrl: stripeSession.url, // or use session.id if you handle redirection client-side
+        sessionId: stripeSession.id,
+        redirectUrl: stripeSession.url,
       });
+    }
 
-    case "razorpay":
+    case "razorpay": {
       // Create a Razorpay order
       const options = {
         amount: Math.round(amount * 100), // in paisa
@@ -76,10 +78,10 @@ const createPayment = TryCatch(async (req, res, next) => {
       return res.status(200).json({
         success: true,
         orderId: razorpayOrder.id,
-        // Pass additional details needed for the frontend checkout widget
       });
+    }
 
-    case "paypal":
+    case "paypal": {
       // Create a PayPal payment
       const paymentJson = {
         intent: "sale",
@@ -119,6 +121,7 @@ const createPayment = TryCatch(async (req, res, next) => {
         }
       });
       break;
+    }
 
     default:
       return next(new ErrorHandler(400, "Unsupported payment gateway"));
@@ -201,7 +204,6 @@ const createPayPalPayment = TryCatch(async (req, res, next) => {
 });
 
 // verify section
-
 const verifyRazorpayPayment = TryCatch(async (req, res, next) => {
   const { orderId, paymentId, signature } = req.body;
   console.log(orderId, paymentId, signature);
@@ -253,7 +255,7 @@ const verifyPaymentSuccess = TryCatch(async (req, res, next) => {
   );
 });
 
-const verifyPaymentCancel = TryCatch(async (req, res, next) => {
+const verifyPaymentCancel = TryCatch(async (req, res) => {
   console.log("Payment Cancelled");
   res.status(200).json({ success: true, message: "Payment cancelled" });
 });

@@ -85,7 +85,7 @@ const AdminLogin = TryCatch(async (req, res, next) => {
  * Get Dashboard Statistics
  * Returns total users, total listings, and KYC record counts by status.
  */
-const getDashboardStats = TryCatch(async (req, res, next) => {
+const getDashboardStats = TryCatch(async (req, res) => {
   const totalUsers = await User.countDocuments();
   const totalListings = await Listing.countDocuments();
   const kycPending = await KYC.countDocuments({ status: "pending" });
@@ -109,7 +109,7 @@ const getDashboardStats = TryCatch(async (req, res, next) => {
  * Get All Users
  * Returns a list of users without sensitive fields.
  */
-const getAllUsers = TryCatch(async (req, res, next) => {
+const getAllUsers = TryCatch(async (req, res) => {
   const users = await User.find().select("-password");
   res.status(200).json({ success: true, users });
 });
@@ -152,7 +152,7 @@ const deleteUser = TryCatch(async (req, res, next) => {
  * Get All Listings
  * Returns all listings with owner details.
  */
-const getAllListings = TryCatch(async (req, res, next) => {
+const getAllListings = TryCatch(async (req, res) => {
   const listings = await Listing.find().populate("owner", "name email");
   res.status(200).json({ success: true, listings });
 });
@@ -185,7 +185,7 @@ const updateListingStatus = TryCatch(async (req, res, next) => {
  * Get All KYC Records
  * Returns all KYC records with user details.
  */
-const getAllKYC = TryCatch(async (req, res, next) => {
+const getAllKYC = TryCatch(async (req, res) => {
   const kycRecords = await KYC.find().populate("user", "name email");
   res.status(200).json({ success: true, kycRecords });
 });
