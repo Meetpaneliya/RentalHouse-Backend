@@ -1,0 +1,13 @@
+# Environment configuration
+**/.env
+
+<<<<<<< HEAD
+(your local changes)
+=======
+(remote repository changes)
+>>>>>>> origin/main
+
+# VS Code Configuration
+**/.vscode/
+node_modules/
+.env
