@@ -262,14 +262,18 @@ app.listen(port, () => {
   console.log(`Server running on Port: ${port} in ${envMode} Mode.`);
 });
 
-// Handle Uncaught Errors & Promise Rejections
-process.on("uncaughtException", (err) => {
-  console.error(` Uncaught Exception: ${err.message}`);
+// Unhandled Promise Rejection Handler
+process.on('unhandledRejection', (err) => {
+  console.log(`Error: ${err.message}`);
+  console.log('Shutting down the server due to Unhandled Promise Rejection');
   process.exit(1);
 });
 
-process.on("unhandledRejection", (err) => {
-  console.error(` Unhandled Promise Rejection: ${err.message}`);
+// Uncaught Exception Handler
+process.on('uncaughtException', (err) => {
+  console.log(`Error: ${err.message}`);
+  console.log('Shutting down the server due to Uncaught Exception');
+  process.exit(1);
 });
 
 // import express from "express";
