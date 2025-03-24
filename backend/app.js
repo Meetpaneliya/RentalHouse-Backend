@@ -215,11 +215,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // CORS Configuration
-const corsOptions = {
-  origin: "http://localhost:5173",
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://rental-house-frontend.vercel.app'
+  ],
   credentials: true,
-};
-app.use(cors(corsOptions));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
+}));
 app.use(morgan("dev"));
 
 // Import API Routes
