@@ -3,7 +3,6 @@ import { User } from "../models/user.js";
 import { TryCatch } from "../middlewares/error.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { sendToken } from "../utils/features.js";
-import { compare } from "bcryptjs";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
 import { configDotenv } from "dotenv";
@@ -45,7 +44,7 @@ const loginUser = TryCatch(async (req, res, next) => {
 
   if (!user) return next(new ErrorHandler(404, "Invalid email or password"));
 
-  const isMatch = await compare(password, user.password);
+  const isMatch = await user.matchPassword(password);
   if (!isMatch) return next(new ErrorHandler(401, "Invalid email or password"));
 
   sendToken(res, user, 200, `Logged in successfully as ${email}`);
