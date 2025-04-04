@@ -9,6 +9,8 @@ import {
   resetPassword,
   logoutUser,
   changeProfilePicture,
+  sendOTP,
+  verifyOTP,
 } from "../controllers/userControllers.js";
 import { protect } from "../middlewares/auth.js";
 import { singlePhoto } from "../utils/multer.js";
@@ -24,5 +26,7 @@ router.put("/update-image", protect,singlePhoto, changeProfilePicture);
 router.delete("/delete", protect, deleteUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+router.post("/send-otp", sendOTP);
+router.post("/verify-otp", verifyOTP);
 
 export default router;

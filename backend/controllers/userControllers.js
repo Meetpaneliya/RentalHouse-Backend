@@ -12,25 +12,90 @@ configDotenv();
 // Register User
 const registerUser = TryCatch(async (req, res, next) => {
   const { name, email, password,role } = req.body;
-  // const profilePicture = req.file;
 
-  if (!name || !email || !password) {
+  if (!name || !email || !password || !role) {
     return next(new ErrorHandler(400, "All fields are required"));
   }
 
-  let user = await User.findOne({ email });
-  if (user) {
+  return sendOTP(req, res, next);
+});
+
+
+const sendOTP = TryCatch(async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return next(new ErrorHandler(400, "Email is required"));
+  }
+
+  // Check if user already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
     return next(new ErrorHandler(400, "User already exists"));
   }
 
-  user = await User.create({
-    name,
+  // Generate 4 digit OTP
+  const otp = Math.floor(1000 + Math.random() * 9000);
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Store OTP temporarily
+  const tempUser = await User.create({
     email,
-    password,
-    role,
+    otp,
+    otpExpiry,
+    password: "temporary", // Will be updated after verification
   });
 
-  sendToken(res, user, 201, "User registered successfully");
+  // Send OTP via email
+  try {
+    await sendEmail({
+      email,
+      subject: "Email Verification OTP",
+      message: `Your OTP for email verification is: ${otp}. Valid for 10 minutes.`,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
+  } catch (error) {
+    await User.findByIdAndDelete(tempUser._id);
+    return next(new ErrorHandler(500, "Error sending OTP", error.message));
+  }
+});
+
+const verifyOTP = TryCatch(async (req, res, next) => {
+  const { email, otp, name, password, role } = req.body;
+
+  if (!email || !otp || !name || !password) {
+    return next(new ErrorHandler(400, "All fields are required"));
+  }
+
+  // Find temporary user
+  const tempUser = await User.findOne({
+    email,
+    otpExpiry: { $gt: Date.now() },
+  }).select("+otp");
+
+  if (!tempUser) {
+    return next(new ErrorHandler(400, "OTP expired or invalid"));
+  }
+
+  // Verify OTP
+  if (tempUser.otp !== parseInt(otp)) {
+    return next(new ErrorHandler(400, "Invalid OTP"));
+  }
+
+  // Update user with full details
+  tempUser.name = name;
+  tempUser.password = password;
+  tempUser.role = role;
+  tempUser.otp = undefined;
+  tempUser.otpExpiry = undefined;
+
+  await tempUser.save();
+
+  sendToken(res, tempUser, 201, "User registered successfully");
 });
 
 // Login User
@@ -58,7 +123,7 @@ const getMe = TryCatch(async (req, res, next) => {
 });
 
 // Update User
-const updateUser = TryCatch(async (req, res, next) => {
+const updateUser = TryCatch(async (req, res) => {
   const user = await User.findByIdAndUpdate(req.user.id, req.body, {
     new: true,
   });
@@ -68,7 +133,7 @@ const updateUser = TryCatch(async (req, res, next) => {
 });
 
 // Delete User
-const deleteUser = TryCatch(async (req, res, next) => {
+const deleteUser = TryCatch(async (req, res) => {
   await User.findByIdAndDelete(req.user.id);
   return res
     .status(200)
@@ -103,7 +168,6 @@ const changeProfilePicture = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // Forgot Password
 const forgotPassword = TryCatch(async (req, res, next) => {
@@ -142,7 +206,7 @@ const forgotPassword = TryCatch(async (req, res, next) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    return next(new ErrorHandler(500, "Email could not be sent"));
+    return next(new ErrorHandler(500, "Email could not be sent", error.message));
   }
 });
 
@@ -175,7 +239,7 @@ const resetPassword = async (req, res) => {
   }
 };
 
-const logoutUser = TryCatch(async (req, res, next) => {
+const logoutUser = TryCatch(async (req, res ) => {
   return res
     .status(200)
     .cookie("Auth-Token", " ", { ...cookieOptions, maxAge: 0 })
@@ -195,4 +259,6 @@ export {
   forgotPassword,
   resetPassword,
   logoutUser,
+  sendOTP,
+  verifyOTP
 };
