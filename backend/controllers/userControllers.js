@@ -34,24 +34,34 @@ const sendOTP = TryCatch(async (req, res, next) => {
     return next(new ErrorHandler(400, "User already exists"));
   }
 
-  // Generate 4 digit OTP
+  // Check if an OTP request already exists for this email
+  const tempUser = await User.findOne({ email, otpExpiry: { $gt: Date.now() } });
+
+  if (tempUser) {
+    return next(new ErrorHandler(400, "OTP already sent. Try again after some time."));
+  }
+
+  // Generate 4-digit OTP
   const otp = Math.floor(1000 + Math.random() * 9000);
+
+  // 🔹 Hash OTP for security before storing
+  const hashedOTP = crypto.createHash("sha256").update(otp.toString()).digest("hex");
+
   const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-  // Store OTP temporarily
-  const tempUser = await User.create({
-    email,
-    otp,
-    otpExpiry,
-    password: "temporary", // Will be updated after verification
-  });
+  // Store hashed OTP in User collection (temporary entry)
+  await User.findOneAndUpdate(
+    { email },
+    { email, otp: hashedOTP, otpExpiry, password: "temporary" },
+    { upsert: true, new: true }
+  );
 
   // Send OTP via email
   try {
     await sendEmail({
       email,
       subject: "Email Verification OTP",
-      message: `Your OTP for email verification is: ${otp}. Valid for 10 minutes.`,
+      message: `Your OTP for email verification is: ${otp}. It is valid for 10 minutes.`,
     });
 
     res.status(200).json({
@@ -59,15 +69,16 @@ const sendOTP = TryCatch(async (req, res, next) => {
       message: "OTP sent successfully",
     });
   } catch (error) {
-    await User.findByIdAndDelete(tempUser._id);
+    await User.findOneAndDelete({ email }); // Remove temp user if OTP sending fails
     return next(new ErrorHandler(500, "Error sending OTP", error.message));
   }
 });
 
+
 const verifyOTP = TryCatch(async (req, res, next) => {
   const { email, otp, name, password, role } = req.body;
 
-  if (!email || !otp || !name || !password) {
+  if (!email || !otp || !name || !password || !role) {
     return next(new ErrorHandler(400, "All fields are required"));
   }
 
@@ -81,22 +92,27 @@ const verifyOTP = TryCatch(async (req, res, next) => {
     return next(new ErrorHandler(400, "OTP expired or invalid"));
   }
 
+  // 🔹 Hash entered OTP for comparison
+  const hashedOTP = crypto.createHash("sha256").update(otp.toString()).digest("hex");
+
   // Verify OTP
-  if (tempUser.otp !== parseInt(otp)) {
+  if (tempUser.otp !== hashedOTP) {
     return next(new ErrorHandler(400, "Invalid OTP"));
   }
 
-  // Update user with full details
-  tempUser.name = name;
-  tempUser.password = password;
-  tempUser.role = role;
-  tempUser.otp = undefined;
-  tempUser.otpExpiry = undefined;
+  // 🔹 Hash the password before saving
+  const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
 
-  await tempUser.save();
+  // Create actual user & remove temporary OTP
+  await User.findOneAndUpdate(
+    { email },
+    { name, password: hashedPassword, role, otp: undefined, otpExpiry: undefined },
+    { new: true }
+  );
 
   sendToken(res, tempUser, 201, "User registered successfully");
 });
+
 
 // Login User
 const loginUser = TryCatch(async (req, res, next) => {
