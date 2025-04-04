@@ -23,6 +23,14 @@ const userSchema = new mongoose.Schema(
       enum: ["tenant", "landlord", "admin"],
       default: "tenant",
     },
+    otp: {
+      type: Number,
+      select: false,
+    },
+    otpExpiry: {
+      type: Date,
+      select: false,
+    },
     profilePicture: {
       type: String, // URL to profile picture
       default: "",

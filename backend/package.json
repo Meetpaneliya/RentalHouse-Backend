@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "set NODE_ENV=PRODUCTION & node app.js",
+    "start": "NODE_ENV=production node app.js",
     "dev": "nodemon app.js",
     "lint": "eslint . ",
     "lint:fix": "eslint . --fix"

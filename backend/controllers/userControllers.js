@@ -80,7 +80,7 @@ const getMe = TryCatch(async (req, res, next) => {
 });
 
 // Update User
-const updateUser = TryCatch(async (req, res, next) => {
+const updateUser = TryCatch(async (req, res) => {
   const user = await User.findByIdAndUpdate(req.user.id, req.body, {
     new: true,
   });
@@ -90,7 +90,7 @@ const updateUser = TryCatch(async (req, res, next) => {
 });
 
 // Delete User
-const deleteUser = TryCatch(async (req, res, next) => {
+const deleteUser = TryCatch(async (req, res) => {
   await User.findByIdAndDelete(req.user.id);
   return res
     .status(200)
@@ -162,7 +162,9 @@ const forgotPassword = TryCatch(async (req, res, next) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    return next(new ErrorHandler(500, "Email could not be sent"));
+    return next(
+      new ErrorHandler(500, "Email could not be sent", error.message)
+    );
   }
 });
 
@@ -195,7 +197,7 @@ const resetPassword = async (req, res) => {
   }
 };
 
-const logoutUser = TryCatch(async (req, res, next) => {
+const logoutUser = TryCatch(async (req, res) => {
   return res
     .status(200)
     .cookie("Auth-Token", " ", { ...cookieOptions, maxAge: 0 })

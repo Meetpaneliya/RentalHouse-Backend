@@ -26,5 +26,7 @@ router.put("/update-image", protect, singlePhoto, changeProfilePicture);
 router.delete("/delete", protect, deleteUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+router.post("/send-otp", sendOTP);
+router.post("/verify-otp", verifyOTP);
 
 export default router;
