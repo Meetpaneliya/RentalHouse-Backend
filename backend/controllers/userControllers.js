@@ -8,29 +8,51 @@ import { sendEmail } from "../utils/sendEmail.js";
 import { configDotenv } from "dotenv";
 import { cookieOptions } from "../middlewares/auth.js";
 import { uploadFilesToCloudinary } from "../lib/helpers.js";
+import { sendOTP, verifyOTP } from "../utils/OTPHelper.js";
 configDotenv();
 // Register User
 const registerUser = TryCatch(async (req, res, next) => {
-  const { name, email, password,role } = req.body;
-  // const profilePicture = req.file;
+  const { name, email, password, role, otp } = req.body;
 
-  if (!name || !email || !password) {
+  if (!name || !email || !password || !role || !otp) {
     return next(new ErrorHandler(400, "All fields are required"));
   }
-
   let user = await User.findOne({ email });
   if (user) {
     return next(new ErrorHandler(400, "User already exists"));
   }
+  const isOtpValid = verifyOTP(email, otp);
+  if (!isOtpValid) {
+    return next(new ErrorHandler(400, "Invalid OTP"));
+  }
+  try {
+    user = await User.create({
+      name,
+      email,
+      password,
+      role,
+      isVerified: true,
+    });
+    sendToken(res, user, 201, "User registered successfully");
+  } catch (error) {
+    return next(new ErrorHandler(500, "Error registering user"));
+  }
+});
 
-  user = await User.create({
-    name,
-    email,
-    password,
-    role,
-  });
+//send OTP to user email
+const sendUserOTP = TryCatch(async (req, res, next) => {
+  const { email } = req.body;
 
-  sendToken(res, user, 201, "User registered successfully");
+  if (!email) {
+    return next(new ErrorHandler(400, "Email is required"));
+  }
+
+  try {
+    await sendOTP(email);
+    res.status(200).json({ success: true, message: "OTP sent successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to send OTP" });
+  }
 });
 
 // Login User
@@ -84,12 +106,12 @@ const changeProfilePicture = async (req, res) => {
 
     const uploadedImage = await uploadFilesToCloudinary([req.file]);
 
-    const userId = req.user._id; 
+    const userId = req.user._id;
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { profilePicture: uploadedImage[0].url },
-      { new: true } 
+      { new: true }
     );
 
     return res.status(200).json({
@@ -97,13 +119,11 @@ const changeProfilePicture = async (req, res) => {
       imageUrl: uploadedImage[0].url,
       user: updatedUser,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // Forgot Password
 const forgotPassword = TryCatch(async (req, res, next) => {
@@ -195,4 +215,5 @@ export {
   forgotPassword,
   resetPassword,
   logoutUser,
+  sendUserOTP,
 };
