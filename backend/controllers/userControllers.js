@@ -151,24 +151,24 @@ const forgotPassword = TryCatch(async (req, res, next) => {
     await sendEmail({
       email: user.email,
       subject: "StaySafe - Password Reset Request",
-      message: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #2c3e50;">StaySafe - Password Reset</h2>
-          <p>Hello ${user.name || 'User'},</p>
-          <p>We received a request to reset your password. Click the button below to change your password:</p>
-          <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #1abc9c; color: #fff; text-decoration: none; border-radius: 5px; margin: 20px 0;">
-            Reset Password
-          </a>
-          <p>If the button doesn’t work, copy and paste this link into your browser:</p>
-          <p><a href="${resetUrl}" style="color: #3498db;">${resetUrl}</a></p>
-          <p>If you didn’t request a password reset, you can safely ignore this email.</p>
-          <br/>
-          <p>Stay Safe,</p>
-          <p><strong>The StaySafe Team</strong></p>
-        </div>
-      `,
+      html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #2c3e50;">StaySafe - Password Reset</h2>
+      <p>Hello ${user.name || 'User'},</p>
+      <p>We received a request to reset your password. Click the button below to change your password:</p>
+      <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #1abc9c; color: #fff; text-decoration: none; border-radius: 5px; margin: 20px 0;">
+        Reset Password
+      </a>
+      <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+      <p><a href="${resetUrl}" style="color: #3498db;">${resetUrl}</a></p>
+      <p>If you didn’t request a password reset, you can safely ignore this email.</p>
+      <br/>
+      <p>Stay Safe,</p>
+      <p><strong>The StaySafe Team</strong></p>
+    </div>
+  `,
     });
-    
+
 
     res
       .status(200)

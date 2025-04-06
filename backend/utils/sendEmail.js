@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const sendEmail = async ({ email, subject, message }) => {
+const sendEmail = async ({ email, subject, html }) => {
   try {
     console.log("Sending email to:", email);
 
@@ -21,7 +21,7 @@ const sendEmail = async ({ email, subject, message }) => {
       from: process.env.EMAIL_FROM,
       to: email,
       subject: subject,
-      text: message,
+      text: html,
     };
 
     const info = await transporter.sendMail(mailOptions);
