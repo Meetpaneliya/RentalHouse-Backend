@@ -10,6 +10,7 @@ import { cookieOptions } from "../middlewares/auth.js";
 import { uploadFilesToCloudinary } from "../lib/helpers.js";
 import { sendOTP, verifyOTP } from "../utils/OTPHelper.js";
 configDotenv();
+
 // Register User
 const registerUser = TryCatch(async (req, res, next) => {
   const { name, email, password, role, otp } = req.body;
@@ -35,7 +36,7 @@ const registerUser = TryCatch(async (req, res, next) => {
     });
     sendToken(res, user, 201, "User registered successfully");
   } catch (error) {
-    return next(new ErrorHandler(500, "Error registering user"));
+    return next(new ErrorHandler(500, "Error registering user", error));
   }
 });
 
@@ -51,7 +52,7 @@ const sendUserOTP = TryCatch(async (req, res, next) => {
     await sendOTP(email);
     res.status(200).json({ success: true, message: "OTP sent successfully!" });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to send OTP" });
+    res.status(500).json({ success: false, message: "Failed to send OTP", error });
   }
 });
 
