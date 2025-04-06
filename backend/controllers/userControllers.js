@@ -149,7 +149,7 @@ const forgotPassword = TryCatch(async (req, res, next) => {
 
   try {
     await sendEmail({
-      email: user.email,
+      email,
       subject: "StaySafe - Password Reset Request",
       html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
