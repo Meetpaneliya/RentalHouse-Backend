@@ -12,7 +12,7 @@ const sendOTP = async (email) => {
     alphabets: false,
     digits: true,
     numbers: true,
-    length: 6,
+    length: 4,
   });
   otpStore.set(email, { otp, expiresAt: Date.now() + 10 * 60 * 1000 }); // 10 minutes expiry
 
