@@ -150,8 +150,8 @@ const forgotPassword = TryCatch(async (req, res, next) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: "Password Reset Request",
-      message: `Click the link to reset your password: ${resetUrl}`,
+      subject: "StaySafe - Password Reset Request",
+      resetpwdlink: `${resetUrl}`,
     });
 
     res

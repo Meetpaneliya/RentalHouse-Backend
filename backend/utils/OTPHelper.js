@@ -18,9 +18,33 @@ const sendOTP = async (email) => {
 
   await sendEmail({
     email,
-    subject: "Don't share your OTP with anyone",
-    message: `Your OTP is ${otp}`,
+    subject: "StaySafe - OTP Verification for Your Account",
+    message: `
+    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; border-radius: 10px; border: 1px solid #eee;">
+      <h2 style="color: #2c3e50;">Welcome to <span style="color: #3498db;">StaySafe Rentals</span>!</h2>
+      <p style="font-size: 16px; color: #555;">
+        Thank you for choosing <strong>StaySafe</strong> – your trusted platform for safe and comfortable rental stays.
+      </p>
+      <p style="font-size: 16px; color: #555;">
+        To complete your sign-up process, please use the OTP (One-Time Password) below to verify your email address:
+      </p>
+      <div style="margin: 20px 0; text-align: center;">
+        <span style="font-size: 28px; font-weight: bold; color: #27ae60;">${otp}</span>
+      </div>
+      <p style="font-size: 15px; color: #999;">
+        This OTP is valid for <strong>10 minutes</strong>. Do not share this code with anyone.
+      </p>
+      <p style="margin-top: 30px; font-size: 14px; color: #aaa;">
+        If you did not request this, please ignore this email.
+      </p>
+      <p style="font-size: 14px; color: #aaa;">
+        Stay safe,<br/>
+        <strong>StaySafe Team</strong>
+      </p>
+    </div>
+    `,
   });
+  
 };
 
 const verifyOTP = (email, enteredOTP) => {
