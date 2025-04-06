@@ -4,7 +4,7 @@ import { sendEmail } from "./sendEmail.js";
 const otpStore = new Map();
 
 const sendOTP = async (email) => {
-  const otp = otpGenerator.generate(6, {
+  const otp = otpGenerator.generate(4, {
     upperCaseAlphabets: false,
     specialChars: false,
     lowerCaseAlphabets: false,
