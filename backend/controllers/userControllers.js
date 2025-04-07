@@ -18,10 +18,7 @@ const registerUser = TryCatch(async (req, res, next) => {
   if (!name || !email || !password || !role || !otp) {
     return next(new ErrorHandler(400, "All fields are required"));
   }
-  let user = await User.findOne({ email });
-  if (user) {
-    return next(new ErrorHandler(400, "User already exists"));
-  }
+ 
   const isOtpValid = verifyOTP(email, otp);
   if (!isOtpValid) {
     return next(new ErrorHandler(400, "Invalid OTP"));
@@ -47,7 +44,10 @@ const sendUserOTP = TryCatch(async (req, res, next) => {
   if (!email) {
     return next(new ErrorHandler(400, "Email is required"));
   }
-
+ let user = await User.findOne({ email });
+  if (user) {
+    return next(new ErrorHandler(400, "User already exists"));
+  }
   try {
     await sendOTP(email);
     res.status(200).json({ success: true, message: "OTP sent successfully!" });
