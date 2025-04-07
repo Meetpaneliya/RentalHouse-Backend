@@ -183,8 +183,6 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     cookieName: "adminjs",
     cookiePassword: process.env.ADMIN_COOKIE_SECRET || "your-secret",
   },
-  null,
-  sessionOptions
 );
 app.use(admin.options.rootPath, adminRouter);
 
