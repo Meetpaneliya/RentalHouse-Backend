@@ -24,7 +24,7 @@ const registerUser = TryCatch(async (req, res, next) => {
     return next(new ErrorHandler(400, "Invalid OTP"));
   }
   try {
-    user = await User.create({
+    const user = await User.create({
       name,
       email,
       password,

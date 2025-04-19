@@ -45,7 +45,6 @@ const sendOTP = async (email) => {
     `,
   });
   
-  
 };
 
 const verifyOTP = (email, enteredOTP) => {
@@ -57,6 +56,7 @@ const verifyOTP = (email, enteredOTP) => {
     return false;
   }
   if (storedOtp.otp !== enteredOTP) return false;
+  
   if (storedOtp.otp === enteredOTP) {
     otpStore.delete(email);
     return true;

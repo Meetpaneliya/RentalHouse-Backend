@@ -87,7 +87,7 @@ const createPayment = TryCatch(async (req, res, next) => {
       const options = {
         amount: Math.round(amount * 100), // in paisa
         currency: currency || "INR",
-        receipt: room._id,
+        receipt: room,
       };
       const razorpayOrder = await razorpay.orders.create(options);
       console.log(razorpayOrder);
