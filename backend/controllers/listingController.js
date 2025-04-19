@@ -22,9 +22,18 @@ const getListingById = TryCatch(async (req, res, next) => {
   const listing = await Listing.findById(id);
 
   if (!listing) {
-      return res.status(404).json({ success: false, message: "Listing not found" });
+    return res
+      .status(404)
+      .json({ success: false, message: "Listing not found" });
   }
-  const reviews = await Review.find({ listing: id }).populate("user", "name email");
+
+  listing.viewCount += 1;
+  await listing.save();
+
+  const reviews = await Review.find({ listing: id }).populate(
+    "user",
+    "name email"
+  );
   res.json({ success: true, data: { listing, reviews } });
 });
 

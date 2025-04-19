@@ -17,9 +17,13 @@ const ListingSchema = new mongoose.Schema(
         required: true,
       },
     },
-    status: { type: String, default: "Available" },
-    price: { type: Number ,required: true},
-    size: { type: Number},
+    status: {
+      type: String,
+      default: "Available",
+      enum: ["Available", "Unavailable", "Reserved"],
+    },
+    price: { type: Number, required: true },
+    size: { type: Number },
     floor: { type: Number },
     location: { type: String, required: true },
     images: [
@@ -44,6 +48,7 @@ const ListingSchema = new mongoose.Schema(
     beds: { type: Number, default: 1 },
     bathrooms: { type: Number, default: 1 },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
+    viewCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

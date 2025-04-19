@@ -24,12 +24,14 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-formidable": "^1.2.0",
     "express-session": "^1.18.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.487.0",
     "mongoose": "8.10.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
@@ -37,6 +39,7 @@
     "otp-generator": "^4.0.1",
     "paypal-rest-sdk": "^1.8.1",
     "razorpay": "^2.9.6",
+    "recharts": "^2.15.2",
     "rollup": "^4.9.6",
     "socket.io": "^4.8.1",
     "stripe": "^17.7.0",
@@ -44,9 +47,12 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@adminjs/bundler": "^3.0.0",
     "@eslint/js": "9.21.0",
+    "css-loader": "^7.1.2",
     "eslint": "9.21.0",
     "globals": "16.0.0",
-    "nodemon": "3.1.9"
+    "nodemon": "3.1.9",
+    "style-loader": "^4.0.0"
   }
 }

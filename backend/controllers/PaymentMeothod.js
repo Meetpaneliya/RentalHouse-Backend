@@ -5,6 +5,8 @@ import { config } from "dotenv";
 import paypal from "paypal-rest-sdk";
 import ErrorHandler from "../utils/errorHandler.js";
 import crypto from "crypto";
+import { Payment } from "../models/PaymentCheckouts.js";
+import { Listing } from "../models/listing.js";
 config(); // Load environment variables
 
 // Stripe instance
@@ -25,8 +27,7 @@ paypal.configure({
 
 // Create Stripe Payment Intent
 const createPayment = TryCatch(async (req, res, next) => {
-  const { gateway, room, amount, currency } = req.body;
-  console.log(gateway, room, amount, currency);
+  const { gateway, room, amount, currency, checkIn, checkOut } = req.body;
   // Validate required fields
   if (!gateway || !room || !amount) {
     return next(new ErrorHandler(400, "Missing required payment details"));
@@ -58,6 +59,21 @@ const createPayment = TryCatch(async (req, res, next) => {
           roomId: room.toString(),
         },
       });
+      const payment = await Listing.findById(room).select("owner");
+
+      await Payment.create({
+        user: req.user._id,
+        listing: payment._id,
+        amount,
+        currency: currency || "USD",
+        gateway: "stripe",
+        status: "pending",
+        checkIn,
+        checkOut,
+        transactionId: stripeSession.id,
+        landlord: payment.owner,
+      });
+
       // Save your payment record if needed...
       return res.status(200).json({
         success: true,
@@ -125,6 +141,32 @@ const createPayment = TryCatch(async (req, res, next) => {
 
     default:
       return next(new ErrorHandler(400, "Unsupported payment gateway"));
+  }
+});
+
+const verifyStripePayment = TryCatch(async (req, res, next) => {
+  const { session_id } = req.body;
+  if (!session_id) {
+    return next(new ErrorHandler(400, "Missing required payment details"));
+  }
+  const session = await stripe.checkout.sessions.retrieve(session_id);
+
+  if (session.payment_status === "paid") {
+    // Payment was successful
+    let payment = await Payment.findOne({
+      transactionId: session.id,
+    });
+
+    payment.status = "completed";
+    await payment.save();
+    return res.status(200).json({
+      success: true,
+      payment,
+      message: "Payment successful",
+      session,
+    });
+  } else {
+    return next(new ErrorHandler(400, "Payment failed"));
   }
 });
 
@@ -264,6 +306,7 @@ export {
   createPayment,
   createRazorpayPayment,
   createPayPalPayment,
+  verifyStripePayment,
   verifyPaymentSuccess,
   verifyPaymentCancel,
   verifyRazorpayPayment,
