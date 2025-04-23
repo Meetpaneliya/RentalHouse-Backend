@@ -27,7 +27,7 @@ const getListingById = TryCatch(async (req, res, next) => {
       .json({ success: false, message: "Listing not found" });
   }
 
-  listing.viewCount += 1;
+  listing.viewCount++;
   await listing.save();
 
   const reviews = await Review.find({ listing: id }).populate(
@@ -39,30 +39,17 @@ const getListingById = TryCatch(async (req, res, next) => {
 
 // Get Listings for a Specific User
 const getUserListings = TryCatch(async (req, res, next) => {
-  const userId = req.user;
-
-  if (!userId)
-    return next(
-      new ErrorHandler(401, "Unauthorized: Please login to view your listings")
-    );
-  const page = parseInt(req.query.page) || 1;
-  const limit = 10;
-  const skip = (page - 1) * limit;
-
-  const listings = await Listing.find({ owner: userId })
-    .skip(skip)
-    .limit(limit)
-    .populate("owner", "name email");
-
-  if (!listings.length) {
-    return res.status(200).json({
-      success: true,
-      message: "No listings found",
-      listings: [],
-    });
+  const userId = req.user._id;
+  const listings = await Listing.find({ owner: userId }).populate(
+    "owner",
+    "name email"
+  );
+  if (!listings || listings.length === 0) {
+    return res
+      .status(404)
+      .json({ success: false, message: "No listings found" });
   }
-
-  res.status(200).json({ success: true, page, listings });
+  res.json({ success: true, data: listings });
 });
 
 // Create a New Listing

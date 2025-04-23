@@ -14,8 +14,8 @@ import { attachmentsMulter } from "../utils/multer.js";
 const router = express.Router();
 
 router.get("/all", getAllListings);
-router.get("/:id", getListingById);
-router.get("/get", protect, getUserListings); // Get user listings
+router.get("/searchbyId/:id", getListingById);
+router.get("/getuserlisting", protect, getUserListings); // Get user listings
 router.get("/search", protect, searchListings); // Search listings by query
 router.get("/nearby", protect, SearchNearbyListings); // Search listings by location
 router.post("/create", protect, attachmentsMulter, createListing); // Create listing

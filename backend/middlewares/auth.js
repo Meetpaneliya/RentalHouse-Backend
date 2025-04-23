@@ -19,8 +19,8 @@ export const protect = TryCatch(async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, "tempsecret");
+
     req.user = await User.findById(decoded._id).select("-password");
-    //req.user = decoded._id;
 
     if (!req.user) {
       return next(new ErrorHandler(401, "User not found"));
@@ -28,6 +28,7 @@ export const protect = TryCatch(async (req, res, next) => {
 
     next();
   } catch (error) {
+    console.error("Error in protect middleware:", error); // Log any errors
     return next(new ErrorHandler(401, "Not authorized, token failed"));
   }
 });

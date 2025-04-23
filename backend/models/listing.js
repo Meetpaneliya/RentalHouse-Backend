@@ -40,7 +40,6 @@ const ListingSchema = new mongoose.Schema(
     // Additional fields for a rental hotel website
     propertyType: {
       type: String,
-      enum: ["hotel", "apartment"],
       required: true,
     },
     amenities: [{ type: String }],
