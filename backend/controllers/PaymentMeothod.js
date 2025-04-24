@@ -7,6 +7,7 @@ import ErrorHandler from "../utils/errorHandler.js";
 import crypto from "crypto";
 import { Payment } from "../models/PaymentCheckouts.js";
 import { Listing } from "../models/listing.js";
+import Booking from "../models/Booking.js";
 config(); // Load environment variables
 
 // Stripe instance
@@ -74,6 +75,15 @@ const createPayment = TryCatch(async (req, res, next) => {
         landlord: payment.owner,
       });
 
+      await Booking.create({
+        user: req.user._id,
+        listing: room,
+        checkIn,
+        checkOut,
+        status: "pending",
+        transactionId: stripeSession.id,
+        Paid: false,
+      });
       // Save your payment record if needed...
       return res.status(200).json({
         success: true,
@@ -156,9 +166,13 @@ const verifyStripePayment = TryCatch(async (req, res, next) => {
     let payment = await Payment.findOne({
       transactionId: session.id,
     });
-
+    let booking = await Booking.findOne({
+      transactionId: session.id,
+    });
+    booking.paid = true;
     payment.status = "completed";
     await payment.save();
+    await booking.save();
     return res.status(200).json({
       success: true,
       payment,

@@ -17,6 +17,8 @@ const bookingSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "cancelled", "checked-in", "checked-out"],
       default: "pending",
     },
+    paid: { type: Boolean, default: false },
+    transactionId: { type: String }, // store gateway's payment/session ID
   },
   { timestamps: true }
 );
