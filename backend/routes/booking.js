@@ -32,6 +32,43 @@ router.get("/checkStatus", async (req, res, next) => {
     next(err);
   }
 });
+
+router.get("/landlord/bookings", async (req, res, next) => {
+  try {
+    const landlordId = req.user._id;
+
+    if (!landlordId) {
+      return res.status(400).json({
+        success: false,
+        message: "Landlord ID is required",
+      });
+    }
+
+    const bookings = await Booking.find({})
+      .populate({
+        path: "listing",
+        match: { owner: landlordId },
+        populate: {
+          path: "owner",
+          select: "name email", // Only get name and email from User
+          model: "User",
+        },
+      })
+      .populate("user", "name email") // Populate user with name and email
+      .exec();
+
+    // Filter out bookings without matching listing (where listing is null)
+    const filteredBookings = bookings.filter((b) => b.listing !== null);
+
+    res.json({
+      success: true,
+      data: filteredBookings,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET a specific booking by ID
 router.get("/get/:id", async (req, res, next) => {
   try {
@@ -81,6 +118,13 @@ router.post("/createBooking", async (req, res, next) => {
       });
     }
 
+    if (String(listing.owner) === String(req.user._id)) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot book your own listing",
+      });
+    }
+
     const newBooking = new Booking({
       user,
       listing,
@@ -105,7 +149,13 @@ router.get("/getBookingByUser", async (req, res, next) => {
     }
     const bookings = await Booking.find({ user: userId })
       .populate("user")
-      .populate("listing");
+      .populate({
+        path: "listing",
+        populate: {
+          path: "owner", // Listing's owner
+          select: "name email", // You can include any fields you want from the owner
+        },
+      });
     if (!bookings) {
       return res
         .status(404)
@@ -150,6 +200,12 @@ router.put("/updateBooking/:id", async (req, res, next) => {
       });
     }
 
+    if (booking.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "This booking has already been processed.",
+      });
+    }
     // ✅ 4. Prevent landlords from modifying bookings they don't own
     if (String(booking.listing.owner) !== String(req.user._id)) {
       return res.status(403).json({

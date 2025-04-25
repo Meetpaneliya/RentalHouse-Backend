@@ -30,6 +30,7 @@ paypal.configure({
 const createPayment = TryCatch(async (req, res, next) => {
   const { gateway, room, amount, currency, checkIn, checkOut } = req.body;
   // Validate required fields
+  console.log(gateway, room, amount, currency, checkIn, checkOut);
   if (!gateway || !room || !amount) {
     return next(new ErrorHandler(400, "Missing required payment details"));
   }
@@ -178,6 +179,7 @@ const verifyStripePayment = TryCatch(async (req, res, next) => {
       payment,
       message: "Payment successful",
       session,
+      booking,
     });
   } else {
     return next(new ErrorHandler(400, "Payment failed"));
