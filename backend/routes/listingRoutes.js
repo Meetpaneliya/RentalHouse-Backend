@@ -16,7 +16,7 @@ const router = express.Router();
 router.get("/all", getAllListings);
 router.get("/searchbyId/:id", getListingById);
 router.get("/getuserlisting", protect, getUserListings); // Get user listings
-router.get("/search", protect, searchListings); // Search listings by query
+router.get("/search", searchListings); // Search listings by query
 router.get("/nearby", protect, SearchNearbyListings); // Search listings by location
 router.post("/create", protect, attachmentsMulter, createListing); // Create listing
 router.put("/update/:id", protect, updateListing); // Update listing

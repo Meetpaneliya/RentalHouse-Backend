@@ -48,6 +48,7 @@ const ListingSchema = new mongoose.Schema(
     bathrooms: { type: Number, default: 1 },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
     viewCount: { type: Number, default: 0 },
+    adminApproved: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

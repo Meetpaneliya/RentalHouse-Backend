@@ -24,6 +24,10 @@ const Components = {
     "KYCShow",
     path.join(__dirname, "./components/KYC")
   ),
+  ApproveSuccess: componentLoader.add(
+    "ApproveSuccess",
+    path.join(__dirname, "./components/Success")
+  ),
 };
 
 export { componentLoader, Components };

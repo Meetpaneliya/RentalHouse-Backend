@@ -9,3 +9,5 @@ import ListingShow from '../src/components/ListingShow'
 AdminJS.UserComponents.ListingShow = ListingShow
 import KYCShow from '../src/components/KYC'
 AdminJS.UserComponents.KYCShow = KYCShow
+import ApproveSuccess from '../src/components/Success'
+AdminJS.UserComponents.ApproveSuccess = ApproveSuccess
