@@ -49,20 +49,6 @@ const authenticate = async (email, password) => {
   return null;
 };
 
-// Configure session middleware
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET || "sessionsecret",
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: {
-//       httpOnly: true,
-//       secure: process.env.NODE_ENV === "production",
-//       maxAge: 1000 * 60 * 60 * 24, // 1 day
-//     },
-//   })
-// );
-
 const adminRouter = AdminJSExpress.buildAuthenticatedRouter(admin, {
   authenticate,
   cookieName: "adminjs",
