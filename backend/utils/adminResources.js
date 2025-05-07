@@ -7,6 +7,7 @@ import { Review } from "../models/Review.js";
 import { User } from "../models/user.js";
 import { Components, componentLoader } from "../src/component.js";
 import path from "path";
+import { request } from "http";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -227,7 +228,14 @@ export const adminResources = {
           "locationGeo.type": { label: "Geo Type" },
           "locationGeo.coordinates": { label: "Geo Coordinates" },
         },
-        listProperties: ["title", "price", "status", "location"],
+        listProperties: [
+          "title",
+          "price",
+          "status",
+          "location",
+          "adminApproved",
+          "viewCount",
+        ],
         editProperties: [
           "title",
           "description",
@@ -245,6 +253,7 @@ export const adminResources = {
           "rooms",
           "beds",
           "bathrooms",
+          "adminApproved",
         ],
         showProperties: [
           "_id",
@@ -266,8 +275,15 @@ export const adminResources = {
           "bathrooms",
           "viewCount",
           "createdAt",
+          "adminApproved",
         ],
-        filterProperties: ["status", "propertyType", "location", "viewCount"],
+        filterProperties: [
+          "status",
+          "propertyType",
+          "location",
+          "viewCount",
+          "adminApproved",
+        ],
         actions: {
           viewListing: {
             actionType: "record",
@@ -276,15 +292,46 @@ export const adminResources = {
             showInDrawer: true,
             component: Components.ListingShow,
             handler: async (request, response, context) => {
+              const { record, h } = context;
+              return {
+                record: record.toJSON(h),
+                notice: {
+                  message: "Listing record loaded successfully",
+                  type: "success",
+                },
+              };
+            },
+          },
+          approve: {
+            actionType: "record",
+            icon: "Check",
+            component: Components.ApproveSuccess,
+            handler: async (request, response, context) => {
               const { record } = context;
+              if (!record) {
+                throw new Error("Record not found");
+              }
+
+              await record.update({ adminApproved: true });
+              const listingId = record.param("listing");
+
+              await Listing.findByIdAndUpdate(listingId, {
+                adminApproved: true,
+              });
               return {
                 record: record.toJSON(),
+                notice: {
+                  message:
+                    "Listing approved successfully and user status updated",
+                  type: "success",
+                },
               };
             },
           },
         },
       },
     },
+
     {
       resource: KYC,
       options: {
@@ -320,15 +367,20 @@ export const adminResources = {
             showInDrawer: true,
             component: Components.KYCShow,
             handler: async (request, response, context) => {
-              const { record } = context;
+              const { record, h } = context;
               return {
-                record: record.toJSON(),
+                record: record.toJSON(h),
+                notice: {
+                  message: "KYC record loaded successfully",
+                  type: "success",
+                },
               };
             },
           },
           approve: {
             actionType: "record",
             icon: "Check",
+            component: Components.ApproveSuccess,
             handler: async (request, response, context) => {
               const { record, h } = context;
 

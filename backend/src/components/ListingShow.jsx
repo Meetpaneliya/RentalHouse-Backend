@@ -7,6 +7,8 @@ import {
   Table,
   TableRow,
   TableCell,
+  Button,
+  Loader,
 } from "@adminjs/design-system";
 import {
   Home,
@@ -19,7 +21,9 @@ import {
   Eye,
   Calendar,
 } from "lucide-react";
-import { ActionHeader } from "adminjs";
+import { ActionHeader, ApiClient } from "adminjs";
+import { useState } from "react";
+const api = new ApiClient();
 
 const styles = {
   container: {
@@ -80,7 +84,30 @@ const styles = {
 
 const ListingShow = (props) => {
   const { record, resource, action } = props;
+  const [loading, setLoading] = useState(false);
+  const [approve, setApprove] = useState(record.params.approve);
   if (!record) return null;
+
+  const handleApprove = async () => {
+    try {
+      setLoading(true);
+
+      const response = await api.recordAction({
+        resourceId: resource.id,
+        recordId: record.id,
+        actionName: "approve",
+      });
+
+      if (response.data?.record?.params?.approve === "approved") {
+        setApprove("approved");
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Approval error:", err);
+      setLoading(false);
+    }
+  };
 
   const params = record.params;
 
@@ -230,23 +257,25 @@ const ListingShow = (props) => {
       <Box style={styles.section}>
         <H2>Location Details</H2>
         <Table>
-          <TableRow>
-            <TableCell>Type</TableCell>
-            <TableCell>{locationGeo.type}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Coordinates</TableCell>
-            <TableCell>
-              {locationGeo.coordinates.length > 0
-                ? locationGeo.coordinates.join(", ")
-                : "Not available"}
-            </TableCell>
-          </TableRow>
+          <tbody>
+            <TableRow>
+              <TableCell>Type</TableCell>
+              <TableCell>{locationGeo.type}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Coordinates</TableCell>
+              <TableCell>
+                {locationGeo.coordinates.length > 0
+                  ? locationGeo.coordinates.join(", ")
+                  : "Not available"}
+              </TableCell>
+            </TableRow>
 
-          <TableRow>
-            <TableCell>Address</TableCell>
-            <TableCell>{location}</TableCell>
-          </TableRow>
+            <TableRow>
+              <TableCell>Address</TableCell>
+              <TableCell>{location}</TableCell>
+            </TableRow>
+          </tbody>
         </Table>
       </Box>
 
@@ -278,6 +307,22 @@ const ListingShow = (props) => {
           </Box>
         </Box>
       )}
+
+      <Box mt="xl">
+        <Button
+          variant="success"
+          onClick={handleApprove}
+          disabled={loading || approve === true}
+        >
+          {loading ? (
+            <Loader />
+          ) : approve /* If approve is a boolean */ ? (
+            "Approved"
+          ) : (
+            "Approve Listing"
+          )}
+        </Button>
+      </Box>
 
       {/* Images Section */}
       {images.length > 0 && (

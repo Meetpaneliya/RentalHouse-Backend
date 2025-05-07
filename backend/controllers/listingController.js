@@ -117,7 +117,7 @@ const createListing = TryCatch(async (req, res, next) => {
     location,
     locationGeo,
     images: uploadedImages,
-    owner: req.user,
+    owner: req.user._id,
     propertyType,
     amenities: amenitiesArray,
     rooms: rooms || 1,

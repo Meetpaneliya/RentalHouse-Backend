@@ -1,5 +1,4 @@
 import { uploadFilesToCloudinary } from "../lib/helpers.js";
-import { getReceiverSocketId, io } from "../lib/socket.js";
 import { TryCatch } from "../middlewares/error.js";
 import Message from "../models/ChatMessaging.js";
 import ErrorHandler from "../utils/errorHandler.js";
